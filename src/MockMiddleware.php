@@ -11,6 +11,8 @@ use function React\Promise\resolve;
 
 class MockMiddleware implements MiddlewareInterface
 {
+    private $mocks = [];
+
     use PostTrait;
     use ErrorTrait;
 
