@@ -7,14 +7,23 @@ use ApiClients\Foundation\Middleware\MiddlewareInterface;
 use ApiClients\Foundation\Middleware\PostTrait;
 use Psr\Http\Message\RequestInterface;
 use React\Promise\CancellablePromiseInterface;
+use function React\Promise\reject;
 use function React\Promise\resolve;
 
-class MockMiddleware implements MiddlewareInterface
+final class MockMiddleware implements MiddlewareInterface
 {
-    private $mocks = [];
-
     use PostTrait;
     use ErrorTrait;
+    /** @var MockInterface[] */
+    private $mocks = [];
+
+    /**
+     * @param MockInterface[] $mocks
+     */
+    public function __construct(MockInterface ...$mocks)
+    {
+        $this->mocks = $mocks;
+    }
 
     /**
      * @param  RequestInterface            $request
@@ -26,6 +35,12 @@ class MockMiddleware implements MiddlewareInterface
         string $transactionId,
         array $options = []
     ): CancellablePromiseInterface {
-        return resolve($request);
+        foreach ($this->mocks as $mock) {
+            if ($mock->match($request)) {
+                return resolve($mock->response($request));
+            }
+        }
+
+        return reject(new \RuntimeException('No matching mocks found'));
     }
 }
