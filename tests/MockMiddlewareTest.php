@@ -4,12 +4,12 @@ namespace ApiClients\Tests\Middleware\Mock;
 
 use ApiClients\Middleware\Mock\MockMiddleware;
 use ApiClients\Middleware\Mock\PathMock;
+use ApiClients\Tools\Psr7\HttpStatusExceptions\InternalServerErrorException;
 use ApiClients\Tools\TestUtilities\TestCase;
 use function Clue\React\Block\await;
 use React\EventLoop\Factory;
 use RingCentral\Psr7\Request;
 use RingCentral\Psr7\Response;
-use RuntimeException;
 
 /**
  * @internal
@@ -18,7 +18,8 @@ class MockMiddlewareTest extends TestCase
 {
     public function testNoMatchingMock(): void
     {
-        self::expectException(RuntimeException::class);
+        self::expectException(InternalServerErrorException::class);
+        self::expectExceptionCode(500);
 
         $middleware = new MockMiddleware();
         $request = new Request('GET', 'https://example.com', [], '');

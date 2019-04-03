@@ -5,15 +5,18 @@ namespace ApiClients\Middleware\Mock;
 use ApiClients\Foundation\Middleware\ErrorTrait;
 use ApiClients\Foundation\Middleware\MiddlewareInterface;
 use ApiClients\Foundation\Middleware\PostTrait;
+use ApiClients\Tools\Psr7\HttpStatusExceptions\InternalServerErrorException;
 use Psr\Http\Message\RequestInterface;
 use React\Promise\CancellablePromiseInterface;
 use function React\Promise\reject;
 use function React\Promise\resolve;
+use RingCentral\Psr7\Response;
 
 final class MockMiddleware implements MiddlewareInterface
 {
     use PostTrait;
     use ErrorTrait;
+    private const ERROR_MESSAGE = 'No matching mocks found';
     /** @var MockInterface[] */
     private $mocks = [];
 
@@ -41,6 +44,6 @@ final class MockMiddleware implements MiddlewareInterface
             }
         }
 
-        return reject(new \RuntimeException('No matching mocks found'));
+        return reject(InternalServerErrorException::create(new Response(500, [], self::ERROR_MESSAGE), new \RuntimeException(self::ERROR_MESSAGE)));
     }
 }
