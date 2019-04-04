@@ -4,10 +4,11 @@ namespace ApiClients\Tests\Middleware\Mock;
 
 use ApiClients\Middleware\Mock\MockMiddleware;
 use ApiClients\Middleware\Mock\PathMock;
-use ApiClients\Tools\Psr7\HttpStatusExceptions\InternalServerErrorException;
 use ApiClients\Tools\TestUtilities\TestCase;
 use function Clue\React\Block\await;
+use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\Factory;
+use function React\Promise\resolve;
 use RingCentral\Psr7\Request;
 use RingCentral\Psr7\Response;
 
@@ -18,13 +19,15 @@ class MockMiddlewareTest extends TestCase
 {
     public function testNoMatchingMock(): void
     {
-        self::expectException(InternalServerErrorException::class);
-        self::expectExceptionCode(500);
-
         $middleware = new MockMiddleware();
         $request = new Request('GET', 'https://example.com', [], '');
 
-        await($middleware->pre($request, 'abc'), Factory::create());
+        /** @var ResponseInterface $response */
+        $response = await($middleware->pre($request, 'abc')->otherwise(function (ResponseInterface $response) {
+            return resolve($response);
+        }), Factory::create());
+
+        self::assertSame(500, $response->getStatusCode());
     }
 
     public function testMatchingMock(): void
@@ -42,7 +45,10 @@ class MockMiddlewareTest extends TestCase
         );
         $request = new Request('GET', 'https://example.com', [], '');
 
-        $modifiedRequest = await($middleware->pre($request, 'abc'), Factory::create());
+        $modifiedRequest = await($middleware->pre($request, 'abc')->otherwise(function (ResponseInterface $response) {
+            return resolve($response);
+        }), Factory::create());
+
         self::assertSame(
             [
                 'Foo' => ['Bar'],
