@@ -40,10 +40,10 @@ final class MockMiddleware implements MiddlewareInterface
     ): CancellablePromiseInterface {
         foreach ($this->mocks as $mock) {
             if ($mock->match($request)) {
-                return resolve($mock->response($request));
+                return reject($mock->response($request));
             }
         }
 
-        return reject(InternalServerErrorException::create(new Response(500, [], self::ERROR_MESSAGE), new \RuntimeException(self::ERROR_MESSAGE)));
+        return reject(new Response(500, [], self::ERROR_MESSAGE));
     }
 }
