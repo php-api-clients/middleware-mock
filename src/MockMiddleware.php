@@ -2,6 +2,7 @@
 
 namespace ApiClients\Middleware\Mock;
 
+use ApiClients\Foundation\Middleware\Annotation\Last;
 use ApiClients\Foundation\Middleware\ErrorTrait;
 use ApiClients\Foundation\Middleware\MiddlewareInterface;
 use ApiClients\Foundation\Middleware\PostTrait;
@@ -30,6 +31,8 @@ final class MockMiddleware implements MiddlewareInterface
      * @param  RequestInterface            $request
      * @param  array                       $options
      * @return CancellablePromiseInterface
+     *
+     * @Last()
      */
     public function pre(
         RequestInterface $request,
