@@ -13,15 +13,19 @@ final class PathMock implements MockInterface
     /** @var ResponseInterface */
     private $response;
 
-    public function __construct(string $path, ResponseInterface $response)
+    /** @var string */
+    private $method;
+
+    public function __construct(string $path, ResponseInterface $response, string $method = 'GET')
     {
         $this->path = $path;
         $this->response = $response;
+        $this->method = $method;
     }
 
     public function match(RequestInterface $request): bool
     {
-        return $request->getUri()->getPath() === $this->path;
+        return $request->getMethod() === $this->method && $request->getUri()->getPath() === $this->path;
     }
 
     public function response(RequestInterface $request): ResponseInterface
